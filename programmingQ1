@@ -1,0 +1,48 @@
+# dijkstra_india.py
+
+import heapq
+
+graph = {
+    "Delhi": [("Jaipur", 280), ("Lucknow", 550), ("Chandigarh", 250)],
+    "Jaipur": [("Delhi", 280), ("Ahmedabad", 660)],
+    "Lucknow": [("Delhi", 550), ("Varanasi", 320)],
+    "Chandigarh": [("Delhi", 250), ("Amritsar", 230)],
+    "Ahmedabad": [("Jaipur", 660), ("Mumbai", 530)],
+    "Mumbai": [("Ahmedabad", 530), ("Pune", 150)],
+    "Pune": [("Mumbai", 150), ("Hyderabad", 560)],
+    "Hyderabad": [("Pune", 560), ("Bangalore", 570)],
+    "Bangalore": [("Hyderabad", 570), ("Chennai", 350)],
+    "Chennai": [("Bangalore", 350)],
+    "Varanasi": [("Lucknow", 320)],
+    "Amritsar": [("Chandigarh", 230)]
+}
+
+def dijkstra(start, goal):
+    pq = [(0, start, [start])]
+    visited = set()
+
+    while pq:
+        cost, node, path = heapq.heappop(pq)
+
+        if node == goal:
+            return path, cost
+
+        if node not in visited:
+            visited.add(node)
+            for neighbor, dist in graph[node]:
+                heapq.heappush(pq, (cost + dist, neighbor, path + [neighbor]))
+
+    return None
+
+# Run
+start = input("Enter start city: ")
+goal = input("Enter goal city: ")
+
+result = dijkstra(start, goal)
+
+if result:
+    path, cost = result
+    print("Shortest Path:", path)
+    print("Total Distance:", cost, "km")
+else:
+    print("No path found")
