@@ -1,0 +1,79 @@
+import heapq
+import random
+
+ROWS, COLS = 20, 20
+
+def generate_grid(density):
+    grid = [[0 for _ in range(COLS)] for _ in range(ROWS)]
+    for i in range(ROWS):
+        for j in range(COLS):
+            if random.random() < density:
+                grid[i][j] = 1
+    return grid
+
+def heuristic(a, b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+def astar(grid, start, goal):
+    pq = [(0, start)]
+    came_from = {}
+    cost_so_far = {start: 0}
+
+    while pq:
+        _, current = heapq.heappop(pq)
+
+        if current == goal:
+            break
+
+        for dx, dy in [(0,1),(1,0),(0,-1),(-1,0)]:
+            nx, ny = current[0]+dx, current[1]+dy
+
+            if 0 <= nx < ROWS and 0 <= ny < COLS and grid[nx][ny] == 0:
+                new_cost = cost_so_far[current] + 1
+                next_node = (nx, ny)
+
+                if next_node not in cost_so_far or new_cost < cost_so_far[next_node]:
+                    cost_so_far[next_node] = new_cost
+                    priority = new_cost + heuristic(goal, next_node)
+                    heapq.heappush(pq, (priority, next_node))
+                    came_from[next_node] = current
+
+    path = []
+    node = goal
+    while node in came_from:
+        path.append(node)
+        node = came_from[node]
+    path.append(start)
+    path.reverse()
+
+    return path
+
+def dynamic_navigation():
+    grid = generate_grid(0.2)
+    start = (0, 0)
+    goal = (ROWS-1, COLS-1)
+
+    current = start
+
+    while current != goal:
+        path = astar(grid, current, goal)
+
+        if not path:
+            print("No path available!")
+            return
+
+        for step in path[1:]:
+            if random.random() < 0.2:
+                x, y = random.randint(0, ROWS-1), random.randint(0, COLS-1)
+                grid[x][y] = 1
+
+            if grid[step[0]][step[1]] == 1:
+                print("Obstacle encountered! Replanning...")
+                break
+
+            current = step
+            print("Moving to:", current)
+
+    print("Reached Goal!")
+
+dynamic_navigation()
